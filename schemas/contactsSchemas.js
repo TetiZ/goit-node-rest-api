@@ -1,19 +1,21 @@
 import Joi from "joi";
 
 export const createContactSchema = Joi.object({
-  name: Joi.string().required.min(2),
-  email: Joi.string().required.email({
-    minDomainSegments: 2,
-    tlds: { allow: ["com", "net", "ua"] },
-  }),
-  phone: Joi.number().integer().min(10).max(10),
+  name: Joi.string().required().min(2),
+  email: Joi.string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net", "ua"] },
+    })
+    .required(),
+  phone: Joi.string().length(10).required(),
 });
 
 export const updateContactSchema = Joi.object({
-  name: Joi.string().required.min(2),
+  name: Joi.string().required().min(2),
   email: Joi.string().email({
     minDomainSegments: 2,
     tlds: { allow: ["com", "net", "ua"] },
   }),
-  phone: Joi.number().integer().min(10).max(10),
+  phone: Joi.string().length(10).required(),
 });

@@ -1,9 +1,10 @@
 import contactsService from "../services/contactsServices.js";
 import express from "express";
 
-import { createContactSchema } from "../schemas/contactsSchemas.js";
-
-const app = express();
+import {
+  createContactSchema,
+  updateContactSchema,
+} from "../schemas/contactsSchemas.js";
 
 const jsonParser = express.json();
 
@@ -16,21 +17,10 @@ export const getAllContacts = async (req, res, next) => {
   }
 };
 
-app.get("/api/contacts", jsonParser, getAllContacts);
-
-app.listen(8090, () => {
-  console.log("Server started on port 8090");
-});
-
-app.use((error, req, res, next) => {
-  console.error(error);
-  res.status(500).send("Internal Server Error");
-});
-
 export const getOneContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const contact = contactsService.getContactById(id);
+    const contact = await contactsService.getContactById(id);
 
     if (!contact) {
       return res.status(404).send({ message: "Not found" });
@@ -41,13 +31,11 @@ export const getOneContact = async (req, res, next) => {
     next(error);
   }
 };
-
-app.get("/api/contacts/:id", jsonParser, getOneContact);
 
 export const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const contact = contactsService.removeContact(id);
+    const contact = await contactsService.removeContact(id);
 
     if (!contact) {
       return res.status(404).send({ message: "Not found" });
@@ -58,8 +46,6 @@ export const deleteContact = async (req, res, next) => {
     next(error);
   }
 };
-
-app.delete("/api/contacts/:id", jsonParser, deleteContact);
 
 export const createContact = async (req, res, next) => {
   try {
@@ -84,8 +70,6 @@ export const createContact = async (req, res, next) => {
   }
 };
 
-app.post("/api/contacts", jsonParser, createContact);
-
 export const updateContact = async (req, res, next) => {
   try {
     const contact = {
@@ -102,7 +86,7 @@ export const updateContact = async (req, res, next) => {
         .send({ message: "Body must have at least one field" });
     }
 
-    const { error, value } = createContactSchema.validate(contact, {
+    const { error, value } = updateContactSchema.validate(contact, {
       convert: false,
     });
 
@@ -115,5 +99,3 @@ export const updateContact = async (req, res, next) => {
     next(error);
   }
 };
-
-app.put("/api/contacts/:id", jsonParser, updateContact);
