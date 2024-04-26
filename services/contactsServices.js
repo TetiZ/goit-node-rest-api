@@ -56,4 +56,30 @@ async function addContact(name, email, phone) {
   }
 }
 
-export default { listContacts, getContactById, removeContact, addContact };
+async function updateContact(contactId, update) {
+  try {
+    const contacts = await listContacts();
+    const idxToUpdate = contacts.findIndex(
+      (contact) => contact.id === contactId
+    );
+
+    if (idxToRemove === -1) {
+      return null;
+    } else {
+      const updatedContact = { ...contacts[idxToUpdate], ...update };
+      contacts[idxToUpdate] = updatedContact;
+      await fs.writeFile(contactsPath, JSON.stringify(contacts, undefined, 2));
+      return updatedContact;
+    }
+  } catch (error) {
+    return null;
+  }
+}
+
+export default {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
+  updateContact,
+};
