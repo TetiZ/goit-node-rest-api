@@ -18,4 +18,4 @@ export const updateContactSchema = Joi.object({
     tlds: { allow: ["com", "net", "ua"] },
   }),
   phone: Joi.string().length(10).required(),
-});
+}).min(1);
