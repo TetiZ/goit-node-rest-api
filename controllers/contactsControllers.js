@@ -40,10 +40,6 @@ export const createContact = async (req, res, next) => {
   try {
     const contact = req.body;
 
-    if (typeof error !== "undefined") throw HttpError(400, error.message);
-
-    if (!contact) throw HttpError(404, messageList[404]);
-
     const newContact = await contactsService.addContact(contact);
     res.status(201).send(newContact);
   } catch (error) {
@@ -56,12 +52,11 @@ export const updateContact = async (req, res, next) => {
     const contact = req.body;
     const { id } = req.params;
 
-    if (typeof error !== "undefined") throw HttpError(400, error.message);
+    const updatedContact = await contactsService.updateContact(id, contact);
 
-    if (!contact) throw HttpError(404, messageList[404]);
+    if (!updatedContact) throw HttpError(404, messageList[404]);
 
-    await contactsService.updateContact(id, contact);
-    res.status(200).send({ id, contact });
+    res.status(200).send(updatedContact);
   } catch (error) {
     next(error);
   }
