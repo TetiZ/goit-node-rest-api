@@ -4,33 +4,34 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export async function userRegister(req, res, next) {
-  const { name, email, password } = req.body;
-
   try {
+    const { name, email, password } = req.body;
+
     const user = await User.findOne({ email });
 
-    if (user !== null) throw HttpError(409, "Email in use");
+    if (!user) throw HttpError(409, "Email in use");
 
     const passHash = await bcrypt.hash(password, 10);
     await User.create({ name, email, password: passHash });
 
-    res.status(201).send({ message: "Registration succesfully" });
+    const res = { user: { email, subscription } };
+    res.status(201).json(res);
   } catch (error) {
     next(error);
   }
 }
 
 export async function userLogin(req, res, next) {
-  const { email, password } = req.body;
-
   try {
+    const { email, password } = req.body;
+
     const user = await User.findOne({ email });
 
-    if (user === null) throw HttpError(401, "Email or password is wrong");
+    if (!user) throw HttpError(401, "Email or password is wrong");
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (isMatch === false) throw HttpError(401, "Email or password is wrong");
+    if (!isMatch) throw HttpError(401, "Email or password is wrong");
 
     const token = jwt.sign(
       { id: user._id, name: user.name },
@@ -40,7 +41,8 @@ export async function userLogin(req, res, next) {
 
     await User.findByIdAndUpdate(user._id, { token });
 
-    res.status(200).send({ token });
+    const res = { token, user: { email, subscription } };
+    res.status(200).json(res);
   } catch (error) {
     next(error);
   }
@@ -48,13 +50,9 @@ export async function userLogin(req, res, next) {
 
 export async function userLogout(req, res, next) {
   try {
-    const user = await User.findById(req.user.id);
-
-    if (!user) throw new HttpError(401, "Not authorized");
-
     await User.findByIdAndUpdate(req.user.id, { token: null });
 
-    res.status(204).send({ message: "Status: 204 No Content" });
+    res.status(204).send({ message: "Status: 204 No Content" }).end();
   } catch (error) {
     next(error);
   }
@@ -62,14 +60,9 @@ export async function userLogout(req, res, next) {
 
 export async function userByToken(req, res, next) {
   try {
-    const user = await User.findById(req.user.id);
+    const { email, subscription } = req.user;
 
-    if (!user) throw new HttpError(401, "Not authorized");
-
-    res.status(200).send({
-      email: user.email,
-      subscription: user.subscription,
-    });
+    res.status(200).json({ email, subscription });
   } catch (error) {
     next(error);
   }
