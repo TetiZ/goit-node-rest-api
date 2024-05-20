@@ -9,6 +9,8 @@ import authMiddleware from "./middleware/auth.js";
 import contactsRouter from "./routes/contactsRouter.js";
 import authRouter from "./routes/authRouter.js";
 
+import path from "path";
+
 import "./db.js";
 
 const app = express();
@@ -19,6 +21,8 @@ app.use(express.json());
 
 app.use("/api/contacts", authMiddleware, contactsRouter);
 app.use("/api/users", authRouter);
+
+app.use("/avatars", express.static(path.resolve("./public/avatars")));
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });

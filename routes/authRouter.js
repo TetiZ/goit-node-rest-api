@@ -9,6 +9,7 @@ import {
 import { uploadAvatar } from "../controllers/userController.js";
 
 import authMiddleware from "../middleware/auth.js";
+import uploadMiddleware from "../middleware/upload.js";
 
 import validateBody from "../helpers/validateBody.js";
 
@@ -24,6 +25,6 @@ userRouter.post("/logout", authMiddleware, userLogout);
 
 userRouter.get("/current", authMiddleware, userByToken);
 
-userRouter.patch("/avatar", authMiddleware, uploadAvatar);
+userRouter.patch("/avatar", uploadMiddleware.single("avatarURL"), uploadAvatar);
 
 export default userRouter;
