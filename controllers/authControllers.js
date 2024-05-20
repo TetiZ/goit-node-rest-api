@@ -7,15 +7,17 @@ export async function userRegister(req, res, next) {
   try {
     const { name, email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-    if (!user) throw HttpError(409, "Email in use");
+    if (existingUser) throw HttpError(409, "Email in use");
 
     const passHash = await bcrypt.hash(password, 10);
-    await User.create({ name, email, password: passHash });
+    const newUser = await User.create({ name, email, password: passHash });
 
-    const res = { user: { email, subscription } };
-    res.status(201).json(res);
+    const response = {
+      user: { email: newUser.email, subscription: newUser.subscription },
+    };
+    res.status(201).json(response);
   } catch (error) {
     next(error);
   }
@@ -41,8 +43,14 @@ export async function userLogin(req, res, next) {
 
     await User.findByIdAndUpdate(user._id, { token });
 
-    const res = { token, user: { email, subscription } };
-    res.status(200).json(res);
+    const response = {
+      token,
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    };
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
