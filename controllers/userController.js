@@ -6,8 +6,6 @@ import HttpError from "../helpers/HttpError.js";
 
 export async function uploadAvatar(req, res, next) {
   try {
-    if (!req.user) throw HttpError(401, "Not authorized");
-
     const filePath = req.file.path;
 
     const newPath = path.resolve("public/avatars", req.file.filename);
