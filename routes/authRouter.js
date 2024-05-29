@@ -6,7 +6,11 @@ import {
   userByToken,
 } from "../controllers/authControllers.js";
 
-import { uploadAvatar } from "../controllers/userController.js";
+import {
+  uploadAvatar,
+  verifyUserByToken,
+  reVerify,
+} from "../controllers/userController.js";
 
 import authMiddleware from "../middleware/auth.js";
 import uploadMiddleware from "../middleware/upload.js";
@@ -31,5 +35,8 @@ userRouter.patch(
   uploadMiddleware.single("avatarURL"),
   uploadAvatar
 );
+
+userRouter.get("/verify/:verificationToken", verifyUserByToken);
+userRouter.post("/verify", reVerify);
 
 export default userRouter;
