@@ -28,8 +28,9 @@ export async function uploadAvatar(req, res, next) {
 }
 
 export async function verifyUserByToken(req, res, next) {
-  const { token } = req.params;
   try {
+    const { token } = req.params;
+
     const user = await User.findOne({ verificationToken: token });
 
     if (!user) throw HttpError(404);
@@ -46,33 +47,18 @@ export async function verifyUserByToken(req, res, next) {
 }
 
 export async function reVerify(req, res, next) {
-  const { email } = req.body;
-  if (!email) {
-    return res.status(400).send({ message: "missing required field email" });
-  }
-  const emailInLowerCase = email.toLowerCase();
-
   try {
-    const user = await User.findOne({ email: emailInLowerCase });
-    if (!user) {
-      return res.status(404).send({ message: "User not found" });
-    }
+    const { email } = req.body;
 
-    if (user.verify) {
-      return res
-        .status(400)
-        .send({ message: "Verification has already been passed" });
-    }
+    const user = await User.findOne({ email });
+    if (!user) throw HttpError(404, "User not found");
+
+    if (user.verify)
+      throw HttpError(400, "Verification has already been passed");
 
     const verificationToken = user.verificationToken;
 
-    mail.sendMail({
-      to: emailInLowerCase,
-      from: "tommytaba99@gmail.com",
-      subject: "Welcome to Contacts!",
-      html: `To confirm your email, please follow the <a href="http://localhost:3000/users/verify/${verificationToken}">link</a>`,
-      text: `To confirm your email, please open the link http://localhost:3000/users/verify/${verificationToken}`,
-    });
+    await mail(email, verificationToken);
 
     res.status(200).send({ message: "Verification email sent" });
   } catch (error) {

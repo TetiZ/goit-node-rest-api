@@ -3,14 +3,12 @@ import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import gravatar from "gravatar";
-import mail from "../mail.js";
+import mail from "../helpers/mail.js";
 import crypto from "node:crypto";
 
 export async function userRegister(req, res, next) {
   try {
     const { name, email, password } = req.body;
-
-    const emailInLowerCase = email.toLowerCase();
 
     const existingUser = await User.findOne({ email });
 
@@ -29,17 +27,11 @@ export async function userRegister(req, res, next) {
       verificationToken,
     });
 
+    await mail(email, verificationToken);
+
     const response = {
       user: { email: newUser.email, subscription: newUser.subscription },
     };
-
-    mail.sendMail({
-      to: emailInLowerCase,
-      from: "tommytaba99@gmail.com",
-      subject: "Welcome to Contacts!",
-      html: `To confirm your email, please follow the <a href="http://localhost:3000/users/verify/${verificationToken}">link</a>`,
-      text: `To confirm your email, please open the link http://localhost:3000/users/verify/${verificationToken}`,
-    });
 
     res.status(201).json(response);
   } catch (error) {

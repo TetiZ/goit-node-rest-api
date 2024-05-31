@@ -17,7 +17,11 @@ import uploadMiddleware from "../middleware/upload.js";
 
 import validateBody from "../helpers/validateBody.js";
 
-import { registerUserSchema, loginUserSchema } from "../schemas/authSchemas.js";
+import {
+  registerUserSchema,
+  loginUserSchema,
+  emailCheckSchema,
+} from "../schemas/authSchemas.js";
 
 const userRouter = express.Router();
 
@@ -37,6 +41,6 @@ userRouter.patch(
 );
 
 userRouter.get("/verify/:verificationToken", verifyUserByToken);
-userRouter.post("/verify", reVerify);
+userRouter.post("/verify", validateBody(emailCheckSchema), reVerify);
 
 export default userRouter;
